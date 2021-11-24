@@ -1,7 +1,10 @@
+//#include "ETH_Helper.h"
+
 #include <Arduino.h>
 #include <MIDI.h>
 #include <AppleMIDI.h>
-#include <Ethernet3.h>
+#include <Ethernet.h>
+//#include <Ethernet3.h>
 #include <EthernetBonjour.h>
 
 // Enter a MAC address for your controller below.
@@ -17,6 +20,12 @@ APPLEMIDI_CREATE_INSTANCE(EthernetUDP, MIDI_RTP, "AppleMIDI-Arduino", DEFAULT_CO
 
 
 void setup() {
+  //ETH_startup();
+
+   if (Ethernet.begin(mac) == 0)
+    for (;;);
+
+  MIDI_RTP.begin(MIDI_CHANNEL_OMNI);
 
   AppleMIDI_RTP.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc, const char* name) {
     isConnected++;
@@ -28,11 +37,21 @@ void setup() {
   });
 
 
+  EthernetBonjour.begin("arduino");
 
+  EthernetBonjour.addServiceRecord("Arduino._apple-midi",
+                                   AppleMIDI_RTP.getPort(),
+                                   MDNSServiceUDP);
 
   MIDI_RTP.begin();
 }
 
 void loop() {
-  
+  MIDI_RTP.read();
+
+  EthernetBonjour.run();
+
+ /*#ifndef ETHERNET3
+    EthernetBonjour.run();
+  #endif */
 }
