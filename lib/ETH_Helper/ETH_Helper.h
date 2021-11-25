@@ -6,10 +6,10 @@
 #endif
 
 // to get the Mac address
-#include <ESP8266WiFi.h>
+// #include <ESP8266WiFi.h>
 
 #define RESET_PIN  26
-#define CS_PIN     5
+#define CS_PIN     15
 
 // Enter a MAC address for your controller below.
 // Newer Ethernet shields have a MAC address printed on a sticker on the shield
