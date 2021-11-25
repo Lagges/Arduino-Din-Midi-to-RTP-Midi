@@ -1,7 +1,10 @@
 #include "ETH_Helper.h"
 
+
+// #define ETHERNET3
+
 #include <Arduino.h>
-// #include <MIDI.h>
+#include <MIDI.h>
 #include <AppleMIDI.h>
 
 // #include <SPI.h>
@@ -19,11 +22,11 @@ unsigned long t1 = millis();
 int8_t isConnected = 0;
 
 APPLEMIDI_CREATE_INSTANCE(EthernetUDP, MIDI_RTP, "DRUMS", DEFAULT_CONTROL_PORT);
-
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial, MIDI);
 
 void setup() {
-  Serial.begin(115200);
-  Serial.write("Booting");
+  // Serial.begin(115200);
+  // Serial.write("Booting");
   
   ETH_startup();
 
@@ -31,15 +34,16 @@ void setup() {
     
 
   MIDI_RTP.begin(MIDI_CHANNEL_OMNI);
+  MIDI.begin(MIDI_CHANNEL_OMNI);
 
   AppleMIDI_RTP.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc, const char* name) {
     isConnected++;
-    Serial.println("Connected to Session");
+    // Serial.println("Connected to Session");
   });
 
   AppleMIDI_RTP.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc) {
     isConnected--;
-    Serial.println("Disconnected from Session");
+    // Serial.println("Disconnected from Session");
   });
 
 
@@ -53,8 +57,15 @@ void setup() {
 }
 
 void loop() {
-  MIDI_RTP.read();
-
+    if (MIDI.read())
+    {
+        // Thru on A has already pushed the input message to out A.
+        // Forward the message to out B as well.
+        MIDI_RTP.send(MIDI.getType(),
+                   MIDI.getData1(),
+                   MIDI.getData2(),
+                   MIDI.getChannel());
+    }
   // EthernetBonjour.run();
 
  #ifndef ETHERNET3

@@ -1,3 +1,6 @@
+// #define ETHERNET3
+
+
 #ifdef ETHERNET3
 #include <Ethernet3.h>
 #else
